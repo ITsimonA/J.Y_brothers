@@ -12,7 +12,7 @@
                 <p>Select Customer</p>
             </div>
             <div class="search">
-                <i class="fas fa-search"></i><input type="text" placeholder="Search orders...">
+                <i class="fas fa-search"></i><input type="text" placeholder="Type customer name or business name...">
             </div>
         </div>
 
