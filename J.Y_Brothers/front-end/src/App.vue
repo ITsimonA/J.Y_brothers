@@ -1,14 +1,18 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
-import AppHeader from '@/Components/AppHeader.vue'
 import Sidebar from '@/Components/sidebar.vue'
 </script>
 
 <template>
   <div class="app-shell">
     <Sidebar />
+
+    <main class="main-panel">
+      <div class="content">
+        <RouterView />
+      </div>
+    </main>
   </div>
-  
 </template>
 
 <style scoped>
@@ -24,7 +28,8 @@ import Sidebar from '@/Components/sidebar.vue'
 }
 
 .content {
-  max-width: 1120px;
+  max-width: 1500px;
   margin: 0 auto;
+  /* border: 1px solid black; */
 }
 </style>

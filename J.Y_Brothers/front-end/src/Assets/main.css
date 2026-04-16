@@ -21,6 +21,7 @@ body {
     radial-gradient(circle at top, rgba(255, 214, 170, 0.24), transparent 28%),
     linear-gradient(180deg, #10212f 0%, #0b1520 100%);
   color: #eef5ff; */
+  background-color: #f6f7f9;
 }
 
 button,

@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
-import MetricCard from '@/Components/MetricCard.vue'
 import { fetchHealth, fetchInfo, type ApiHealth, type ApiInfo } from '@/services/api'
 import { fetchTasks } from '@/services/tasks'
 import type { Task } from '@/types/task'
@@ -59,14 +58,29 @@ onMounted(async () => {
         <div v-else-if="error" class="status-panel error">{{ error }}</div>
 
         <div v-else class="grid">
-            <MetricCard label="Backend status" :value="health?.status ?? 'unknown'" detail="From /api/health" />
+            <article class="metric-card">
+                <span>Backend status</span>
+                <strong>{{ health?.status ?? 'unknown' }}</strong>
+                <small>From /api/health</small>
+            </article>
 
-            <MetricCard label="Environment" :value="info?.environment ?? 'unknown'" detail="From /api/info"
-                tone="accent" />
+            <article class="metric-card accent">
+                <span>Environment</span>
+                <strong>{{ info?.environment ?? 'unknown' }}</strong>
+                <small>From /api/info</small>
+            </article>
 
-            <MetricCard label="Total tasks" :value="tasks.length" detail="Rows in the MySQL database" />
+            <article class="metric-card">
+                <span>Total tasks</span>
+                <strong>{{ tasks.length }}</strong>
+                <small>Rows in the MySQL database</small>
+            </article>
 
-            <MetricCard label="Completed" :value="completedTasks" :detail="`${pendingTasks} pending`" tone="success" />
+            <article class="metric-card success">
+                <span>Completed</span>
+                <strong>{{ completedTasks }}</strong>
+                <small>{{ pendingTasks }} pending</small>
+            </article>
         </div>
     </section>
 </template>
@@ -78,7 +92,8 @@ onMounted(async () => {
 }
 
 .hero-card,
-.status-panel {
+.status-panel,
+.metric-card {
     border-radius: 28px;
     background: rgba(11, 21, 32, 0.72);
     border: 1px solid rgba(255, 255, 255, 0.09);
@@ -118,37 +133,72 @@ h2 {
 .cta {
     align-self: center;
     border-radius: 999px;
-    padding: 0.95rem 1.25rem;
-    background: linear-gradient(135deg, #f6c177, #ffd9a2);
-    color: #0b1520;
+    padding: 14px 20px;
+    background: linear-gradient(135deg, #f6c177, #ff8a65);
+    color: #101f2d;
     font-weight: 700;
-    white-space: nowrap;
+    text-decoration: none;
+    box-shadow: 0 16px 30px rgba(246, 193, 119, 0.24);
+}
+
+.status-panel {
+    padding: 22px 24px;
+}
+
+.status-panel.muted {
+    color: rgba(238, 245, 255, 0.72);
+}
+
+.status-panel.error {
+    color: #ffb4b4;
+    border-color: rgba(255, 132, 132, 0.25);
+    background: rgba(255, 80, 80, 0.08);
 }
 
 .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 18px;
 }
 
-.status-panel {
-    padding: 18px;
+.metric-card {
+    padding: 20px;
 }
 
-.muted {
-    color: rgba(238, 245, 255, 0.75);
+.metric-card span,
+.metric-card small {
+    display: block;
+    color: rgba(238, 245, 255, 0.74);
 }
 
-.error {
-    color: #ffb4b4;
-    border-color: rgba(255, 132, 132, 0.4);
-    background: rgba(255, 80, 80, 0.09);
+.metric-card strong {
+    display: block;
+    margin: 12px 0 10px;
+    font-size: 1.6rem;
 }
 
-@media (max-width: 860px) {
+.metric-card.accent strong {
+    color: #f6c177;
+}
+
+.metric-card.success strong {
+    color: #8ee3a4;
+}
+
+@media (max-width: 920px) {
     .hero-card {
         flex-direction: column;
         align-items: flex-start;
+    }
+
+    .grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 640px) {
+    .grid {
+        grid-template-columns: 1fr;
     }
 }
 </style>
