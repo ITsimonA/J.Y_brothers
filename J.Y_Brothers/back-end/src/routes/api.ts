@@ -1,4 +1,5 @@
 import { Router } from 'express'
+import tasksRouter from './tasks.js'
 
 const apiRouter = Router()
 
@@ -23,5 +24,7 @@ apiRouter.get('/message', (_req, res) => {
     message: 'Hello from the backend API.',
   })
 })
+
+apiRouter.use('/tasks', tasksRouter)
 
 export default apiRouter

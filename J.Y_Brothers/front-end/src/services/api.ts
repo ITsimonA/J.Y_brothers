@@ -10,10 +10,6 @@ export type ApiInfo = {
   message: string
 }
 
-export type ApiMessage = {
-  message: string
-}
-
 async function requestJson<T>(path: string): Promise<T> {
   const response = await fetch(`/api${path}`)
 
@@ -30,8 +26,4 @@ export function fetchHealth() {
 
 export function fetchInfo() {
   return requestJson<ApiInfo>('/info')
-}
-
-export function fetchMessage() {
-  return requestJson<ApiMessage>('/message')
 }

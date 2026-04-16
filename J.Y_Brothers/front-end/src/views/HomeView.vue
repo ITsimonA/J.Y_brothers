@@ -1,26 +1,38 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
-import { fetchHealth, fetchInfo, fetchMessage, type ApiHealth, type ApiInfo, type ApiMessage } from '@/services/api'
+import { computed, onMounted, ref } from 'vue'
+import { RouterLink } from 'vue-router'
+import MetricCard from '@/Components/MetricCard.vue'
+import { fetchHealth, fetchInfo, type ApiHealth, type ApiInfo } from '@/services/api'
+import { fetchTasks } from '@/services/tasks'
+import type { Task } from '@/types/task'
 
 const health = ref<ApiHealth | null>(null)
 const info = ref<ApiInfo | null>(null)
-const message = ref<ApiMessage | null>(null)
+const tasks = ref<Task[]>([])
 const loading = ref(true)
 const error = ref<string | null>(null)
 
+const completedTasks = computed(() => tasks.value.filter((task) => task.completed).length)
+const pendingTasks = computed(() => tasks.value.length - completedTasks.value)
+
 onMounted(async () => {
+    loading.value = true
+
     try {
-        const [healthResponse, infoResponse, messageResponse] = await Promise.all([
+        const [healthResponse, infoResponse, tasksResponse] = await Promise.all([
             fetchHealth(),
             fetchInfo(),
-            fetchMessage(),
+            fetchTasks(),
         ])
 
         health.value = healthResponse
         info.value = infoResponse
-        message.value = messageResponse
+        tasks.value = tasksResponse
     } catch (caughtError) {
-        error.value = caughtError instanceof Error ? caughtError.message : 'Unexpected error while loading data.'
+        error.value =
+            caughtError instanceof Error
+                ? caughtError.message
+                : 'Unexpected error while loading dashboard data.'
     } finally {
         loading.value = false
     }
@@ -28,56 +40,58 @@ onMounted(async () => {
 </script>
 
 <template>
-    <section class="hero-card">
-        <div>
-            <p class="label">Live API status</p>
-            <h2>Backend data is loading into the Vue app.</h2>
-            <p class="summary">
-                The front end now talks to the Node.js backend through the Vite proxy at <strong>/api</strong>.
-            </p>
+    <section class="home-page">
+        <div class="hero-card">
+            <div>
+                <p class="label">Live API status</p>
+                <h2>Backend data is loading into the Vue app.</h2>
+                <p class="summary">
+                    The front end now talks to the Node.js backend through the Vite proxy at
+                    <strong>/api</strong>.
+                </p>
+            </div>
+
+            <RouterLink class="cta" to="/tasks">Go to CRUD workspace</RouterLink>
         </div>
 
-        <div v-if="loading" class="status-panel muted">
-            Loading backend data...
-        </div>
+        <div v-if="loading" class="status-panel muted">Loading dashboard data...</div>
 
-        <div v-else-if="error" class="status-panel error">
-            {{ error }}
-        </div>
+        <div v-else-if="error" class="status-panel error">{{ error }}</div>
 
         <div v-else class="grid">
-            <article class="status-panel">
-                <span class="panel-title">Health</span>
-                <strong>{{ health?.status }}</strong>
-                <p>Uptime: {{ health?.uptime }}s</p>
-                <p>Updated: {{ health?.timestamp }}</p>
-            </article>
+            <MetricCard label="Backend status" :value="health?.status ?? 'unknown'" detail="From /api/health" />
 
-            <article class="status-panel">
-                <span class="panel-title">Info</span>
-                <strong>{{ info?.name }}</strong>
-                <p>{{ info?.message }}</p>
-                <p>Environment: {{ info?.environment }}</p>
-            </article>
+            <MetricCard label="Environment" :value="info?.environment ?? 'unknown'" detail="From /api/info"
+                tone="accent" />
 
-            <article class="status-panel accent">
-                <span class="panel-title">Message</span>
-                <strong>{{ message?.message }}</strong>
-            </article>
+            <MetricCard label="Total tasks" :value="tasks.length" detail="Rows in the MySQL database" />
+
+            <MetricCard label="Completed" :value="completedTasks" :detail="`${pendingTasks} pending`" tone="success" />
         </div>
     </section>
 </template>
 
 <style scoped>
-.hero-card {
+.home-page {
     display: grid;
-    gap: 24px;
-    padding: 28px;
+    gap: 20px;
+}
+
+.hero-card,
+.status-panel {
     border-radius: 28px;
     background: rgba(11, 21, 32, 0.72);
     border: 1px solid rgba(255, 255, 255, 0.09);
-    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.32);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.24);
     backdrop-filter: blur(18px);
+}
+
+.hero-card {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 28px;
 }
 
 .label {
@@ -101,6 +115,16 @@ h2 {
     line-height: 1.65;
 }
 
+.cta {
+    align-self: center;
+    border-radius: 999px;
+    padding: 0.95rem 1.25rem;
+    background: linear-gradient(135deg, #f6c177, #ffd9a2);
+    color: #0b1520;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
 .grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -108,36 +132,7 @@ h2 {
 }
 
 .status-panel {
-    min-height: 150px;
     padding: 18px;
-    border-radius: 22px;
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.status-panel strong {
-    display: block;
-    margin: 8px 0 10px;
-    font-size: 1.2rem;
-}
-
-.status-panel p {
-    margin: 0 0 6px;
-    color: rgba(238, 245, 255, 0.8);
-}
-
-.panel-title {
-    display: inline-flex;
-    padding: 0.3rem 0.7rem;
-    border-radius: 999px;
-    background: rgba(246, 193, 119, 0.12);
-    color: #f6c177;
-    font-size: 0.8rem;
-    font-weight: 700;
-}
-
-.accent {
-    background: linear-gradient(135deg, rgba(63, 150, 255, 0.18), rgba(246, 193, 119, 0.12));
 }
 
 .muted {
@@ -148,5 +143,12 @@ h2 {
     color: #ffb4b4;
     border-color: rgba(255, 132, 132, 0.4);
     background: rgba(255, 80, 80, 0.09);
+}
+
+@media (max-width: 860px) {
+    .hero-card {
+        flex-direction: column;
+        align-items: flex-start;
+    }
 }
 </style>
