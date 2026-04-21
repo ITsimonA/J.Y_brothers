@@ -1,62 +1,37 @@
-import mysql from 'mysql2/promise'
+import { mkdirSync } from 'node:fs'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
-const databaseName = process.env.DB_NAME ?? 'j_y_brothers'
-const connectionOptions = {
-  host: process.env.DB_HOST ?? '127.0.0.1',
-  port: Number(process.env.DB_PORT ?? 3306),
-  user: process.env.DB_USER ?? 'root',
-  password: process.env.DB_PASSWORD ?? '',
-}
+import { DatabaseSync } from 'node:sqlite'
 
-const bootstrapDatabase = mysql.createPool({
-  ...connectionOptions,
-  waitForConnections: true,
-  connectionLimit: 1,
-})
+const moduleDirectory = dirname(fileURLToPath(import.meta.url))
+const dataDirectory = join(moduleDirectory, '../../data')
+const databasePath = join(dataDirectory, 'j-y-brothers.sqlite')
 
-const database = mysql.createPool({
-  ...connectionOptions,
-  database: databaseName,
-  waitForConnections: true,
-  connectionLimit: Number(process.env.DB_CONNECTION_LIMIT ?? 10),
-})
+mkdirSync(dataDirectory, { recursive: true })
 
-let initialization: Promise<void> | null = null
+const database = new DatabaseSync(databasePath)
+
+let initialization = false
 
 export async function initializeDatabase(): Promise<void> {
-  if (!initialization) {
-    initialization = (async () => {
-      const bootstrapConnection = await bootstrapDatabase.getConnection()
-
-      try {
-        await bootstrapConnection.query('CREATE DATABASE IF NOT EXISTS ??', [databaseName])
-      } finally {
-        bootstrapConnection.release()
-      }
-
-      const connection = await database.getConnection()
-
-      try {
-        await connection.query(`
-          CREATE TABLE IF NOT EXISTS tasks (
-            id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-            title VARCHAR(255) NOT NULL,
-            description TEXT NOT NULL,
-            completed TINYINT(1) NOT NULL DEFAULT 0,
-            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-          )
-        `)
-      } finally {
-        connection.release()
-      }
-    })().catch((error) => {
-      initialization = null
-      throw error
-    })
+  if (initialization) {
+    return
   }
 
-  return initialization
+  database.exec('PRAGMA foreign_keys = ON;')
+  database.exec(`
+    CREATE TABLE IF NOT EXISTS tasks (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      title TEXT NOT NULL,
+      description TEXT NOT NULL,
+      completed INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    )
+  `)
+
+  initialization = true
 }
 
 export default database

@@ -1,77 +1,61 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '@/views/HomeView.vue'
-import NotFoundView from '@/views/NotFoundView.vue'
-import TasksView from '@/views/TasksView.vue'
-import sidebar from '@/Components/sidebar.vue'
-import dashboard from '@/Pages/dashboard.vue'
-import costumer from '@/Pages/costumer.vue'
-import deliveries from '@/Pages/deliveries.vue'
-import employees from '@/Pages/employees.vue'
-import inventory from '@/Pages/inventory.vue'
-import order from '@/Pages/order.vue'
-import newOrder from '@/Pages/new-order.vue'
-import products from '@/Pages/products.vue'
+import DashboardPage from '@/Pages/dashboard.vue'
+import CustomerPage from '@/Pages/costumer.vue'
+import DeliveriesPage from '@/Pages/deliveries.vue'
+import EmployeesPage from '@/Pages/employees.vue'
+import InventoryPage from '@/Pages/inventory.vue'
+import NewOrderPage from '@/Pages/new-order.vue'
+import OrderPage from '@/Pages/order.vue'
+import ProductsPage from '@/Pages/products.vue'
 
 const routes = [
   {
     path: '/',
-    name: 'home',
-    component: HomeView,
-  },
-  {
-    path: '/tasks',
-    name: 'tasks',
-    component: TasksView,
+    redirect: '/dashboard',
   },
   {
     path: '/dashboard',
     name: 'dashboard',
-    component: dashboard,
+    component: DashboardPage,
   },
   {
     path: '/orders',
     name: 'orders',
-    component: order,
+    component: OrderPage,
   },
   {
     path: '/new-order',
     name: 'new-order',
-    component: newOrder,
+    component: NewOrderPage,
   },
   {
     path: '/customers',
     name: 'customers',
-    component: costumer,
+    component: CustomerPage,
   },
   {
     path: '/products',
     name: 'products',
-    component: products,
+    component: ProductsPage,
   },
   {
     path: '/inventory',
     name: 'inventory',
-    component: inventory,
+    component: InventoryPage,
   },
   {
     path: '/deliveries',
     name: 'deliveries',
-    component: deliveries,
+    component: DeliveriesPage,
   },
   {
     path: '/employees',
     name: 'employees',
-    component: employees,
-  },
-  {
-    path: '/sidebar',
-    name: 'sidebar',
-    component: sidebar,
+    component: EmployeesPage,
   },
   {
     path: '/:pathMatch(.*)*',
-    name: 'not-found',
-    component: NotFoundView,
+    redirect: '/dashboard',
   },
 ]
 

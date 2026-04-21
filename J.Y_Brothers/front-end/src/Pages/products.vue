@@ -128,7 +128,12 @@ function formatPrice(value) {
             <i class="fas fa-chevron-down"></i>
         </div>
     </div>
-    <div v-if="products.length > 0" class="product-grid">
+    <div v-if="products.length === 0" class="no-com">
+        <img src="../Assets/person_search.svg" alt="No products">
+        <p>No products created yet</p>
+    </div>
+
+    <div v-else class="product-grid">
         <div v-for="product in products" :key="product.id" class="product-card">
             <div class="product-main">
                 <div class="product-header">
@@ -317,6 +322,35 @@ function formatPrice(value) {
     background-color: transparent;
     border: none;
     outline: none;
+}
+
+.no-com {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    min-height: 220px;
+    width: 100%;
+    margin-top: 24px;
+    padding: 28px 20px;
+    background-color: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 10px;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+    text-align: center;
+    color: #666;
+}
+
+.no-com img {
+    width: 64px;
+    height: 64px;
+}
+
+.no-com p {
+    margin: 0;
+    font-family: var(--font-family-secondary);
+    font-size: 14px;
 }
 
 .product-grid {

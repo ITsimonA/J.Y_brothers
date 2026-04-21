@@ -41,3 +41,6 @@ __screenshots__/
 # Local SQL databases for the backend
 back-end/data/*.sqlite
 back-end/data/*.db
+
+# Front-end build artifacts that should never be committed
+front-end/src/Assets/*.exe

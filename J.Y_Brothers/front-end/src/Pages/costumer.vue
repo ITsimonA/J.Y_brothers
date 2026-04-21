@@ -145,7 +145,7 @@ function fullName(customer) {
             <div class="customer-main">
                 <div class="customer-heading">
                     <h3>{{ customer.businessName }}</h3>
-                    <p>{{ fullName(customer) }}</p>
+                    <p>{{ fullName(customer) }}</p> 
                 </div>
 
                 <div class="customer-details">

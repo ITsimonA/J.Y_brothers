@@ -1,4 +1,4 @@
-<script setup lang="ts">
+                                                                                                                WWWWWWWWWWW<script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import { fetchHealth, fetchInfo, type ApiHealth, type ApiInfo } from '@/services/api'

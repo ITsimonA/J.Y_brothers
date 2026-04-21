@@ -1,5 +1,3 @@
-import { type ResultSetHeader, type RowDataPacket } from 'mysql2'
-
 import database, { initializeDatabase } from '../lib/database.js'
 
 export type TaskRecord = {
@@ -24,7 +22,7 @@ type TaskRow = {
   completed: number
   createdAt: string
   updatedAt: string
-} & RowDataPacket
+}
 
 function mapTask(row: TaskRow): TaskRecord {
   return {
@@ -40,26 +38,9 @@ function mapTask(row: TaskRow): TaskRecord {
 export async function listTasks(): Promise<TaskRecord[]> {
   await initializeDatabase()
 
-  const [rows] = await database.query<TaskRow[]>(`
-    SELECT
-      id,
-      title,
-      description,
-      completed,
-      created_at AS createdAt,
-      updated_at AS updatedAt
-    FROM tasks
-    ORDER BY id DESC
-  `)
-
-  return rows.map(mapTask)
-}
-
-export async function getTaskById(id: number): Promise<TaskRecord | undefined> {
-  await initializeDatabase()
-
-  const [rows] = await database.query<TaskRow[]>(
-    `
+  const rows = database
+    .prepare(
+      `
       SELECT
         id,
         title,
@@ -68,12 +49,32 @@ export async function getTaskById(id: number): Promise<TaskRecord | undefined> {
         created_at AS createdAt,
         updated_at AS updatedAt
       FROM tasks
-      WHERE id = ?
+      ORDER BY id DESC
     `,
-    [id],
-  )
+    )
+    .all() as TaskRow[]
 
-  const [row] = rows
+  return rows.map(mapTask)
+}
+
+export async function getTaskById(id: number): Promise<TaskRecord | undefined> {
+  await initializeDatabase()
+
+  const row = database
+    .prepare(
+      `
+        SELECT
+          id,
+          title,
+          description,
+          completed,
+          created_at AS createdAt,
+          updated_at AS updatedAt
+        FROM tasks
+        WHERE id = ?
+      `,
+    )
+    .get(id) as TaskRow | undefined
 
   return row ? mapTask(row) : undefined
 }
@@ -81,12 +82,11 @@ export async function getTaskById(id: number): Promise<TaskRecord | undefined> {
 export async function createTask(input: TaskInput): Promise<TaskRecord> {
   await initializeDatabase()
 
-  const [result] = await database.execute<ResultSetHeader>(
-    'INSERT INTO tasks (title, description, completed) VALUES (?, ?, ?)',
-    [input.title, input.description, input.completed ? 1 : 0],
-  )
+  const result = database
+    .prepare('INSERT INTO tasks (title, description, completed) VALUES (?, ?, ?)')
+    .run(input.title, input.description, input.completed ? 1 : 0)
 
-  const taskId = result.insertId
+  const taskId = Number(result.lastInsertRowid)
   const task = await getTaskById(taskId)
 
   if (!task) {
@@ -99,16 +99,17 @@ export async function createTask(input: TaskInput): Promise<TaskRecord> {
 export async function updateTask(id: number, input: TaskInput): Promise<TaskRecord | undefined> {
   await initializeDatabase()
 
-  const [result] = await database.execute<ResultSetHeader>(
-    `
-      UPDATE tasks
-      SET title = ?, description = ?, completed = ?, updated_at = CURRENT_TIMESTAMP
-      WHERE id = ?
-    `,
-    [input.title, input.description, input.completed ? 1 : 0, id],
-  )
+  const result = database
+    .prepare(
+      `
+        UPDATE tasks
+        SET title = ?, description = ?, completed = ?, updated_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+      `,
+    )
+    .run(input.title, input.description, input.completed ? 1 : 0, id)
 
-  if (result.affectedRows === 0) {
+  if (Number(result.changes) === 0) {
     return undefined
   }
 
@@ -118,7 +119,7 @@ export async function updateTask(id: number, input: TaskInput): Promise<TaskReco
 export async function deleteTask(id: number): Promise<boolean> {
   await initializeDatabase()
 
-  const [result] = await database.execute<ResultSetHeader>('DELETE FROM tasks WHERE id = ?', [id])
+  const result = database.prepare('DELETE FROM tasks WHERE id = ?').run(id)
 
-  return result.affectedRows > 0
+  return Number(result.changes) > 0
 }

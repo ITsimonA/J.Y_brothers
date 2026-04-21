@@ -9,4 +9,11 @@ app.use(express.json())
 
 app.use('/api', apiRouter)
 
+app.use((error: unknown, _req, res, _next) => {
+  const message = error instanceof Error ? error.message : 'Unexpected server error.'
+
+  console.error(error)
+  res.status(500).json({ message })
+})
+
 export default app
