@@ -1,4 +1,5 @@
 import { Router } from 'express'
+import authRouter from './auth.js'
 import tasksRouter from './tasks.js'
 
 const apiRouter = Router()
@@ -25,6 +26,7 @@ apiRouter.get('/message', (_req, res) => {
   })
 })
 
+apiRouter.use('/auth', authRouter)
 apiRouter.use('/tasks', tasksRouter)
 
 export default apiRouter

@@ -1,14 +1,39 @@
-<script setup>
+<script setup lang="ts">
+import { computed } from 'vue'
+import { useRouter } from 'vue-router'
 
+import { clearAuthSession, getCurrentUser } from '@/services/auth'
+
+const router = useRouter()
+const currentUser = computed(() => getCurrentUser())
+
+function handleSignOut(): void {
+    clearAuthSession()
+    router.replace('/login')
+}
 </script>
 
 <template>
     <div class="sidebar">
-        <div class="profile">
-            <img src="../assets/Profile.jpg" alt="Profile Picture">
-            <div>
-                <h1>Simon Antonio Almero</h1>
-                <p>Admin</p>
+        <div class="profile-wrap">
+            <div class="profile">
+                <img src="../assets/Profile.jpg" alt="Profile Picture">
+                <div>
+                    <h1>{{ currentUser?.fullName ?? 'Simon Antonio Almero' }}</h1>
+                    <p>Admin</p>
+                </div>
+            </div>
+
+            <div class="profile-menu">
+                <p class="menu-title">Account</p>
+
+                <button type="button" class="menu-link sign-out-link" @click="handleSignOut">
+                    Sign out
+                </button>
+
+                <router-link to="/register" class="menu-link">
+                    Sign up
+                </router-link>
             </div>
         </div>
         <nav>
@@ -57,6 +82,11 @@
     flex-direction: column;
     width: 300px;
     background-color: #101f2d;
+}
+
+.profile-wrap {
+    position: relative;
+    margin-bottom: 8px;
 }
 
 nav div {
@@ -123,6 +153,7 @@ nav div h1 {
     padding: 20px 0;
     margin-left: 15px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    cursor: default;
 }
 
 .profile img {
@@ -137,5 +168,62 @@ p {
     color: #fff;
     font-family: var(--font-family-secondary);
     font-weight: 300;
+}
+
+.profile-menu {
+    position: absolute;
+    left: 16px;
+    top: calc(100% + 10px);
+    min-width: 190px;
+    padding: 12px;
+    border-radius: 16px;
+    background: #0b1620;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 18px 36px rgba(0, 0, 0, 0.28);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-6px);
+    transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
+    z-index: 5;
+}
+
+.profile-wrap:hover .profile-menu,
+.profile-wrap:focus-within .profile-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.menu-title {
+    margin: 0 0 8px;
+    padding-bottom: 8px;
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.55);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.menu-link {
+    display: block;
+    width: 100%;
+    border: 0;
+    padding: 10px 12px;
+    border-radius: 10px;
+    color: #fff;
+    text-decoration: none;
+    font-family: var(--font-family-secondary);
+    font-weight: 300;
+    background: transparent;
+    text-align: left;
+    cursor: pointer;
+}
+
+.menu-link:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.sign-out-link {
+    color: #fca5a5;
 }
 </style>

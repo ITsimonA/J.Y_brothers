@@ -10,6 +10,10 @@ export type ApiInfo = {
   message: string
 }
 
+export type ApiError = {
+  message: string
+}
+
 async function requestJson<T>(path: string): Promise<T> {
   const response = await fetch(`/api${path}`)
 
